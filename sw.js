@@ -1,5 +1,5 @@
 /* 緣來喝茶持股人生 — 離線快取 */
-const VERSION = 'v1-2026-10-24';
+const VERSION = 'v2-2026-10-24-askbar';
 const CACHE = 'hold-' + VERSION;
 const ASSETS = [
   './',
