@@ -1,0 +1,20 @@
+{
+  "name": "緣來喝茶持股人生",
+  "short_name": "持股人生",
+  "description": "台股持股健檢：集中度、產業曝險、個股ETF比重、現金比重、壓力測試。純本機計算，不上傳資料。",
+  "lang": "zh-Hant",
+  "dir": "ltr",
+  "id": "https://qboy945.github.io/holdings/",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eef2f4",
+  "theme_color": "#1f4e5f",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

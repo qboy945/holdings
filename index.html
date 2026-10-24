@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f4e5f">
+<link rel="manifest" href="./manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="持股人生">
+<meta name="description" content="台股持股健檢：集中度、產業曝險、個股ETF比重。純本機計算，不上傳資料。">
+<title>緣來喝茶持股人生</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  background:#eef2f4;color:#20303a;font-size:16px;line-height:1.6;padding-bottom:96px}
+header{background:linear-gradient(135deg,#1f4e5f,#2e7d8f);color:#fff;padding:22px 18px 18px;position:sticky;top:0;z-index:10;
+  box-shadow:0 2px 12px rgba(0,0,0,.18)}
+header .brand{font-size:12px;font-weight:600;letter-spacing:1.5px;color:rgba(255,255,255,.82);margin-bottom:4px}
+header h1{margin:0;font-size:19px;font-weight:700;letter-spacing:.5px}
+header p{margin:6px 0 0;font-size:12.5px;opacity:.85}
+main{padding:16px 14px;max-width:560px;margin:0 auto}
+.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(20,50,60,.08)}
+.card h2{margin:0 0 14px;font-size:15px;font-weight:700;color:#1f4e5f;padding-bottom:9px;
+  border-bottom:2px solid #e3ecef;display:flex;align-items:center;gap:7px}
+.card h2 span.n{background:#1f4e5f;color:#fff;width:20px;height:20px;border-radius:50%;font-size:12px;
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #f0f4f6}
+.row:last-child{border-bottom:none}
+.row label{font-size:14.5px;color:#3c5158;flex:1 1 auto;min-width:0}
+input[type=number],input[type=text],select{width:118px;flex:0 0 auto;padding:9px 10px;font-size:16px;text-align:right;
+  border:1.5px solid #d3dee3;border-radius:9px;background:#fafcfd;color:#1a2a32;font-family:inherit}
+input:focus,select:focus{outline:none;border-color:#2e7d8f;background:#fff;box-shadow:0 0 0 3px rgba(46,125,143,.12)}
+.btn{width:100%;padding:16px;font-size:17px;font-weight:700;font-family:inherit;color:#fff;
+  background:linear-gradient(135deg,#1f4e5f,#2e7d8f);border:none;border-radius:12px;cursor:pointer;
+  box-shadow:0 3px 12px rgba(31,78,95,.3)}
+.btn:active{transform:scale(.985)}
+.btn.ghost{background:#fff;color:#1f4e5f;border:2px solid #cfdde2;box-shadow:none;font-size:15px;padding:13px}
+.hide{display:none!important}
+.totals{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.tot{background:#f7fafb;border-radius:10px;padding:11px;text-align:center;border:1px solid #e8f0f3}
+.tot b{display:block;font-size:19px;color:#1f4e5f;letter-spacing:-.5px}
+.tot small{font-size:11.5px;color:#7d949e}
+.warn{background:#fff5f5;border-left:4px solid #d94a4a;border-radius:8px;padding:11px 13px;
+  font-size:13.5px;color:#8a2b2b;margin-bottom:9px;line-height:1.55}
+.ok{background:#f2fbf5;border-left:4px solid #2e9e5b;border-radius:8px;padding:11px 13px;
+  font-size:13.5px;color:#1e6b3c;margin-bottom:9px}
+.disc{font-size:12px;color:#8fa3ac;line-height:1.7;margin:16px 0 6px}
+.stamp{text-align:center;font-size:11px;color:#a8bcc5;margin:0 0 8px}
+.askbar{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;align-items:center;gap:10px;
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);
+  border-top:1px solid #e3ecef;box-shadow:0 -2px 14px rgba(15,23,42,.08);backdrop-filter:blur(8px)}
+.askbar .txt{flex:1;min-width:0;font-size:12px;line-height:1.45;color:#8fa3ac}
+.askbar .txt b{display:block;font-size:13px;color:#20303a;margin-bottom:1px}
+.askbar a{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;text-decoration:none;
+  background:#06c755;color:#fff;font-size:13.5px;font-weight:800;padding:10px 16px;border-radius:24px;white-space:nowrap}
+.askbar a:active{opacity:.85}
+.srow{border:1.5px solid #e3ecef;border-radius:11px;padding:10px 12px 12px;margin-bottom:10px;background:#fbfdfe}
+.srow-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.srow-top input.code{flex:1 1 auto;width:auto;text-align:left;font-size:16px;font-weight:700;letter-spacing:1px}
+.srow-top .del{flex:0 0 auto;width:34px;height:34px;border:none;background:#f2f6f8;color:#8fa3ac;
+  border-radius:9px;font-size:17px;cursor:pointer;font-family:inherit}
+.srow-top .del:active{background:#ffe8e8;color:#d94a4a}
+.srow-name{font-size:12px;color:#2e7d8f;font-weight:600;margin:-2px 0 8px 2px;min-height:16px}
+.srow-name.unknown{color:#c0392b}
+.srow-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.srow-grid label{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:#7d949e}
+.srow-grid input{width:100%!important;text-align:right;padding:8px 8px;font-size:15px}
+.tag{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:5px;margin-left:5px;vertical-align:middle}
+.tag.etf{background:#e8f2ff;color:#2563a8}
+.tag.stk{background:#f0f4f6;color:#7d949e}
+.bar{height:7px;border-radius:4px;background:#eef3f5;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#2e7d8f,#4fa8b8)}
+.bar i.red{background:linear-gradient(90deg,#d94a4a,#e87676)}
+.bar i.amber{background:linear-gradient(90deg,#d99b2b,#e8bb6a)}
+.li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #f2f6f8;font-size:14px}
+.li:last-child{border-bottom:none}
+.li .l{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.li .v{flex:0 0 auto;font-weight:700;color:#1f4e5f;font-variant-numeric:tabular-nums}
+.li .v.small{font-weight:600;font-size:13px;color:#5c7480}
+.pct{font-size:12.5px;color:#7d949e;font-weight:600;margin-left:6px}
+.big{text-align:center;padding:6px 0 14px}
+.big b{display:block;font-size:31px;font-weight:800;color:#1f4e5f;letter-spacing:-1px;line-height:1.2}
+.big small{font-size:12.5px;color:#7d949e}
+.big.pos b{color:#c0392b}
+.big.neg b{color:#2e9e5b}
+.note{font-size:11.5px;color:#a8bcc5;line-height:1.6;margin:10px 0 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">緣來喝茶圓滿人生</div>
+  <h1>持股人生</h1>
+  <p>集中度 ｜ 產業曝險 ｜ 個股ETF比重 ｜ 純本機計算，資料不外傳</p>
+</header>
+
+<main>
+  <div class="card">
+    <h2><span class="n">1</span>我的持股</h2>
+    <div id="list"></div>
+    <button class="btn ghost" id="add" style="margin-top:6px">＋ 新增一檔</button>
+    <p class="note">價格為你手動輸入，非即時行情。請自行留意輸入日期。</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">2</span>現金與其他</h2>
+    <div class="row">
+      <label>手邊現金（含定存）<span class="hint">用來算現金比重</span></label>
+      <input type="number" id="cash" value="0" min="0" step="1000" inputmode="decimal">
+    </div>
+    <div class="row">
+      <label>價格輸入日期</label>
+      <input type="text" id="pdate" placeholder="2026-10-24" style="text-align:center">
+    </div>
+  </div>
+
+  <button class="btn" id="calc">開始健檢</button>
+
+  <div id="out" class="hide" style="margin-top:18px"></div>
+
+  <div id="actions" class="hide">
+    <button class="btn ghost" id="print" style="margin-bottom:10px">列印 / 存成 PDF</button>
+    <p style="font-size:11.5px;color:#8fa3ac;text-align:center;margin:0 0 4px">
+      手機請選「列印」→ 再選「儲存為 PDF」
+    </p>
+  </div>
+
+  <p class="disc">
+    本工具僅整理你自行輸入的持股資料，不提供買賣建議、不預測報酬、不構成投資推薦。<br>
+    價格由使用者手動輸入，非即時行情，可能與市價有落差。
+  </p>
+  <p class="stamp">資料僅在本機運算，不會上傳</p>
+
+  <div class="askbar">
+    <div class="txt"><b>有投資問題？</b>直接問我，免費協助</div>
+    <a href="https://line.me/R/ti/p/~Qboywang" target="_blank" rel="noopener">💬 LINE 諮詢</a>
+  </div>
+</main>
+
+<script src="./stocks.js"></script>
+<script src="./etfs.js"></script>
+<script>
+(function(){
+"use strict";
+
+var $ = function(id){ return document.getElementById(id); };
+
+/* ── 產業代碼對照（證交所 33 類）── */
+var IND = {
+  '01':'水泥','02':'食品','03':'塑膠','04':'紡織','05':'電機機械','06':'電器電纜',
+  '08':'玻璃陶瓷','09':'造紙','10':'鋼鐵','11':'橡膠','12':'汽車','14':'建材營造',
+  '15':'航運','16':'觀光','17':'金融保險','18':'貿易百貨','20':'其他','21':'化學',
+  '22':'生技醫療','23':'油電燃氣','24':'半導體','25':'電腦及週邊','26':'光電',
+  '27':'通信網路','28':'電子零組件','29':'電子通路','30':'資訊服務','31':'其他電子',
+  '35':'綠能環保','36':'數位雲端','37':'運動休閒','38':'居家生活','91':'存託憑證'
+};
+
+/* ── ETF 判斷：從證交所 ETF 清單取，這裡用常見規則 ── */
+var ETF_SET = {};
+(function(){
+  var raw = window.STOCK_DB || '';
+  var arr = raw.split(';');
+  for (var i=0;i<arr.length;i++){
+    var p = arr[i].split('|');
+    if (p.length<3) continue;
+    if (!window.__DB) window.__DB = {};
+    window.__DB[p[0]] = {name:p[1], ind:p[2]};
+  }
+})();
+
+function db(code){
+  if (window.__DB && window.__DB[code]) return window.__DB[code];
+  if (ETF_MAP[code]) return {name: ETF_MAP[code], ind:'ETF'};
+  return null;
+}
+
+/* ETF 判斷：用證交所官方 ETF 清單 */
+var ETF_MAP = {};
+(function(){
+  var raw = window.ETF_DB || '';
+  var arr = raw.split(';');
+  for (var i=0;i<arr.length;i++){
+    var p = arr[i].split('|');
+    if (p.length>=2 && p[0]) ETF_MAP[p[0]] = p[1];
+  }
+})();
+function isETF(code){
+  if (!code) return false;
+  return !!ETF_MAP[code];
+}
+/* ETF 名稱（若產業資料查不到時使用） */
+function etfName(code){
+  return ETF_MAP[code] || '';
+}
+
+/* ── 數字格式 ── */
+function n0(v){ return Math.round(v).toLocaleString('en-US'); }
+function n1(v){ return (Math.round(v*10)/10).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1}); }
+function n2(v){ return (Math.round(v*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function pc(v,d){ if(d===undefined)d=1; return (Math.round(v*Math.pow(10,d))/Math.pow(10,d)).toFixed(d)+'%'; }
+/* 金額：自動換成萬／億 */
+function money(v){
+  var a = Math.abs(v);
+  if (a >= 1e8) return n2(v/1e8) + ' 億';
+  if (a >= 1e4) return n1(v/1e4) + ' 萬';
+  return n0(v);
+}
+
+/* ── 持股列管理 ── */
+var rows = [];
+
+function addRow(code, shares, cost, price){
+  rows.push({ code: code||'', shares: shares||'', cost: cost||'', price: price||'' });
+  renderList();
+}
+
+function renderList(){
+  var box = $('list');
+  box.innerHTML = '';
+  if (!rows.length){
+    box.innerHTML = '<p style="font-size:13px;color:#8fa3ac;text-align:center;padding:14px 0">還沒有持股，按下面按鈕新增</p>';
+    return;
+  }
+  rows.forEach(function(r, idx){
+    var d = db(r.code);
+    var nameHtml;
+    if (!r.code){
+      nameHtml = '<div class="srow-name">　</div>';
+    } else if (d){
+      nameHtml = '<div class="srow-name">' + d.name +
+        (isETF(r.code) ? '<span class="tag etf">ETF</span>' : '<span class="tag stk">個股</span>') +
+        '</div>';
+    } else {
+      nameHtml = '<div class="srow-name unknown">查無此代號（仍可計算）</div>';
+    }
+    var div = document.createElement('div');
+    div.className = 'srow';
+    div.innerHTML =
+      '<div class="srow-top">' +
+        '<input class="code" data-i="'+idx+'" data-f="code" value="'+r.code+'" placeholder="代號 2330" maxlength="6" inputmode="numeric">' +
+        '<button class="del" data-del="'+idx+'">✕</button>' +
+      '</div>' + nameHtml +
+      '<div class="srow-grid">' +
+        '<label>股數<input type="number" data-i="'+idx+'" data-f="shares" value="'+r.shares+'" min="0" step="1" inputmode="decimal"></label>' +
+        '<label>成本均價<input type="number" data-i="'+idx+'" data-f="cost" value="'+r.cost+'" min="0" step="0.01" inputmode="decimal"></label>' +
+        '<label>現價（手動）<input type="number" data-i="'+idx+'" data-f="price" value="'+r.price+'" min="0" step="0.01" inputmode="decimal"></label>' +
+      '</div>';
+    box.appendChild(div);
+  });
+}
+
+/* 事件代理 */
+$('list').addEventListener('input', function(e){
+  var t = e.target;
+  if (t.dataset.i === undefined) return;
+  var i = +t.dataset.i, f = t.dataset.f;
+  if (!rows[i]) return;
+  rows[i][f] = t.value;
+  if (f === 'code'){
+    t.value = t.value.toUpperCase().replace(/[^0-9A-Z]/g,'');
+    rows[i][f] = t.value;
+    renderList();
+    var el = document.querySelector('#list .srow:nth-child('+(i+1)+') input.code');
+    if (el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+  }
+});
+$('list').addEventListener('click', function(e){
+  var t = e.target;
+  if (t.dataset.del !== undefined){
+    rows.splice(+t.dataset.del, 1);
+    renderList();
+  }
+});
+$('add').addEventListener('click', function(){ addRow(); });
+
+/* ── 主計算 ── */
+function calc(){
+  var items = [], skipped = [], noPrice = [];
+  var totalCost = 0, totalMkt = 0;
+
+  rows.forEach(function(r){
+    var code = (r.code||'').trim().toUpperCase();
+    if (!code) return;
+    var sh = parseFloat(r.shares) || 0;
+    var ct = parseFloat(r.cost) || 0;
+    var pr = parseFloat(r.price) || 0;
+    if (sh <= 0){ skipped.push(code); return; }
+    var d = db(code);
+    var item = {
+      code: code,
+      name: d ? d.name : code,
+      ind: d ? d.ind : '',
+      indName: (d && d.ind==='ETF') ? 'ETF' : (d && IND[d.ind] ? IND[d.ind] : '未分類'),
+      shares: sh, cost: ct, price: pr,
+      isETF: isETF(code)
+    };
+    if (pr > 0){
+      item.mkt = sh * pr;
+      item.pnl = (pr - ct) * sh;
+      item.roe = ct > 0 ? (pr - ct) / ct * 100 : 0;
+      totalMkt += item.mkt;
+      totalCost += ct * sh;
+      items.push(item);
+    } else {
+      noPrice.push(item);
+    }
+  });
+
+  if (!items.length){
+    alert('請至少輸入一檔的股數與現價');
+    return null;
+  }
+
+  /* 依市值排序 */
+  items.sort(function(a,b){ return b.mkt - a.mkt; });
+
+  /* 集中度 */
+  var denom = totalMkt; /* 股票總市值 */
+  items.forEach(function(it){ it.w = denom > 0 ? it.mkt / denom * 100 : 0; });
+
+  var top1 = items[0] ? items[0].w : 0;
+  var top3 = items.slice(0,3).reduce(function(s,x){ return s + x.w; }, 0);
+  var hhi = items.reduce(function(s,x){ return s + Math.pow(x.w/100, 2); }, 0);
+
+  /* 產業曝險（ETF 排除：成分股分散於多產業，不能算單一產業） */
+  var indMap = {};
+  var etfIndMkt = 0;
+  items.forEach(function(it){
+    if (it.isETF){ etfIndMkt += it.mkt; return; }
+    var k = it.indName;
+    if (!indMap[k]) indMap[k] = 0;
+    indMap[k] += it.mkt;
+  });
+  var indBase = denom - etfIndMkt;   /* 產業曝險的分母：只算個股 */
+  var inds = Object.keys(indMap).map(function(k){
+    return { name:k, mkt:indMap[k], w: indBase>0 ? indMap[k]/indBase*100 : 0 };
+  }).sort(function(a,b){ return b.mkt - a.mkt; });
+
+  /* 個股 vs ETF */
+  var etfMkt = items.filter(function(x){ return x.isETF; }).reduce(function(s,x){ return s+x.mkt; },0);
+  var stkMkt = denom - etfMkt;
+
+  /* 現金 */
+  var cash = parseFloat($('cash').value) || 0;
+  var totalAsset = denom + cash;
+  var cashW = totalAsset > 0 ? cash/totalAsset*100 : 0;
+  var stockW = totalAsset > 0 ? denom/totalAsset*100 : 0;
+
+  /* 壓力測試：最大持股跌 30% */
+  var drop30 = items[0] ? items[0].mkt * 0.3 : 0;
+  var drop30Asset = totalAsset > 0 ? drop30/totalAsset*100 : 0;
+
+  var pnl = totalMkt - totalCost;
+  var roe = totalCost > 0 ? pnl/totalCost*100 : 0;
+
+  return {
+    items: items, inds: inds, noPrice: noPrice, skipped: skipped,
+    totalMkt: totalMkt, totalCost: totalCost, pnl: pnl, roe: roe,
+    top1: top1, top3: top3, hhi: hhi,
+    etfMkt: etfMkt, stkMkt: stkMkt, etfW: denom>0?etfMkt/denom*100:0, stkW: denom>0?stkMkt/denom*100:0,
+    cash: cash, totalAsset: totalAsset, cashW: cashW, stockW: stockW,
+    drop30: drop30, drop30Asset: drop30Asset,
+    etfIndMkt: etfIndMkt, indBase: indBase,
+    pdate: ($('pdate').value||'').trim(),
+    nItems: items.length
+  };
+}
+
+/* ── 輸出 ── */
+function render(){
+  var R = calc();
+  if (!R) return;
+  var h = '';
+
+  /* 總覽 */
+  h += '<div class="card"><h2><span class="n">◎</span>總覽</h2>';
+  h += '<div class="big '+(R.pnl>=0?'pos':'neg')+'"><b>'+(R.pnl>=0?'+':'')+money(R.pnl)+'</b>'+
+       '<small>未實現損益　'+(R.pnl>=0?'+':'')+pc(R.roe,2)+'</small></div>';
+  h += '<div class="totals">' +
+       '<div class="tot"><b>'+money(R.totalMkt)+'</b><small>股票市值</small></div>' +
+       '<div class="tot"><b>'+money(R.totalCost)+'</b><small>持股成本</small></div>' +
+       '<div class="tot"><b>'+money(R.totalAsset)+'</b><small>總資產（含現金）</small></div>' +
+       '<div class="tot"><b>'+R.nItems+' 檔</b><small>有效持股</small></div>' +
+       '</div>';
+  if (R.pdate){
+    h += '<p class="note" style="text-align:center;margin-top:2px">價格為手動輸入，日期：'+R.pdate+'</p>';
+  } else {
+    h += '<p class="note" style="text-align:center;margin-top:2px;color:#d99b2b">價格為手動輸入，未填日期</p>';
+  }
+  h += '</div>';
+
+  /* 集中度 */
+  h += '<div class="card"><h2><span class="n">①</span>集中度</h2>';
+
+  function cRow(label, val, limit, unitTxt){
+    var bad = val > limit;
+    h += '<div class="li"><span class="l">'+label+
+         '<div class="bar"><i class="'+(bad?'red':'')+'" style="width:'+Math.min(val,100)+'%"></i></div></span>'+
+         '<span class="v '+(bad?'':'small')+'" style="'+(bad?'color:#d94a4a':'')+'">'+pc(val)+'</span></div>';
+  }
+
+  h += '<div class="li"><span class="l">最大單一持股</span><span class="v">'+pc(R.top1)+'</span></div>';
+  h += '<div class="li"><span class="l">前三大持股合計</span><span class="v">'+pc(R.top3)+'</span></div>';
+  h += '<div class="li"><span class="l">HHI 集中度指數</span><span class="v">'+n2(R.hhi)+'</span></div>';
+
+  /* 判斷 */
+  var msgs = [];
+  if (R.top1 > 20) msgs.push('單一持股 <b>'+pc(R.top1)+'</b>，超過 20% 的警戒線（'+R.items[0].name+'）。');
+  if (R.top3 > 50) msgs.push('前三大持股合計 <b>'+pc(R.top3)+'</b>，超過 50%。');
+  if (R.hhi > 0.25) msgs.push('HHI <b>'+n2(R.hhi)+'</b> 高於 0.25，屬於高度集中。');
+  h += '<div style="margin-top:12px">';
+  if (msgs.length){
+    msgs.forEach(function(m){ h += '<div class="warn">'+m+'</div>'; });
+  } else {
+    h += '<div class="ok">集中度在常見參考範圍內（單一 &lt;20%、前三大 &lt;50%、HHI &lt;0.25）。</div>';
+  }
+  h += '</div>';
+
+  /* 壓力測試 */
+  h += '<div style="margin-top:6px;padding-top:10px;border-top:1px dashed #e3ecef">';
+  h += '<div style="font-size:13px;color:#5c7480;margin-bottom:6px">如果最大持股（'+R.items[0].name+'）明天跌 30%</div>';
+  h += '<div class="li"><span class="l">損失金額</span><span class="v" style="color:#d94a4a">'+money(R.drop30)+'</span></div>';
+  h += '<div class="li"><span class="l">占總資產</span><span class="v" style="color:#d94a4a">'+pc(R.drop30Asset)+'</span></div>';
+  h += '</div>';
+  h += '</div>';
+
+  /* 產業曝險 */
+  h += '<div class="card"><h2><span class="n">②</span>產業曝險</h2>';
+  if (R.etfIndMkt > 0){
+    h += '<p class="note" style="margin:-4px 0 10px">僅計個股（占股票市值 '+pc(R.indBase/R.totalMkt*100)+
+         '）。ETF 占 '+pc(R.etfIndMkt/R.totalMkt*100)+'，成分股分散於多產業，不列入單一產業。</p>';
+  }
+  R.inds.forEach(function(x, i){
+    var bad = x.w > 40;
+    h += '<div class="li"><span class="l">'+(i+1)+'. '+x.name+
+         '<div class="bar"><i class="'+(bad?'red':(x.w>25?'amber':''))+'" style="width:'+Math.min(x.w,100)+'%"></i></div></span>'+
+         '<span class="v small" style="'+(bad?'color:#d94a4a':'')+'">'+pc(x.w)+'</span></div>';
+  });
+  var topInd = R.inds[0];
+  if (topInd && topInd.w > 40){
+    h += '<div class="warn" style="margin-top:12px">單一產業「<b>'+topInd.name+'</b>」占 '+pc(topInd.w)+
+         '，超過 40%。這些股票會同時受同一個景氣循環影響。</div>';
+  } else if (topInd) {
+    h += '<div class="ok" style="margin-top:12px">最大產業「'+topInd.name+'」占 '+pc(topInd.w)+'，未超過 40%。</div>';
+  }
+  h += '</div>';
+
+  /* 結構 */
+  h += '<div class="card"><h2><span class="n">③</span>資產結構</h2>';
+
+  /* 個股 vs ETF */
+  h += '<div style="font-size:13px;color:#5c7480;margin-bottom:8px">股票部位組成</div>';
+  h += '<div class="li"><span class="l">個股（主動選股）'+
+       '<div class="bar"><i style="width:'+R.stkW+'%"></i></div></span>'+
+       '<span class="v small">'+pc(R.stkW)+'　'+money(R.stkMkt)+'</span></div>';
+  h += '<div class="li"><span class="l">ETF（被動）'+
+       '<div class="bar"><i style="width:'+R.etfW+'%"></i></div></span>'+
+       '<span class="v small">'+pc(R.etfW)+'　'+money(R.etfMkt)+'</span></div>';
+
+  /* 現金比重 */
+  h += '<div style="font-size:13px;color:#5c7480;margin:14px 0 8px">總資產配置</div>';
+  h += '<div class="li"><span class="l">股票'+
+       '<div class="bar"><i style="width:'+R.stockW+'%"></i></div></span>'+
+       '<span class="v small">'+pc(R.stockW)+'</span></div>';
+  h += '<div class="li"><span class="l">現金'+
+       '<div class="bar"><i style="width:'+R.cashW+'%"></i></div></span>'+
+       '<span class="v small">'+pc(R.cashW)+'　'+money(R.cash)+'</span></div>';
+
+  if (R.cashW === 0){
+    h += '<div class="warn" style="margin-top:12px">現金比重 0%，沒有銀彈。遇到大跌時無法加碼，也無法應付突發支出。</div>';
+  } else if (R.cashW < 5){
+    h += '<div class="warn" style="margin-top:12px">現金比重僅 '+pc(R.cashW)+'，偏低。</div>';
+  }
+  h += '</div>';
+
+  /* 明細 */
+  h += '<div class="card"><h2><span class="n">④</span>持股明細</h2>';
+  h += '<table style="width:100%;border-collapse:collapse;font-size:13px">';
+  h += '<thead><tr style="border-bottom:2px solid #e3ecef">'+
+       '<th style="text-align:left;padding:7px 3px;color:#7d949e;font-weight:600">股票</th>'+
+       '<th style="text-align:right;padding:7px 3px;color:#7d949e;font-weight:600">市值</th>'+
+       '<th style="text-align:right;padding:7px 3px;color:#7d949e;font-weight:600">損益</th>'+
+       '<th style="text-align:right;padding:7px 3px;color:#7d949e;font-weight:600">占比</th></tr></thead><tbody>';
+  R.items.forEach(function(it){
+    var c = it.pnl >= 0 ? '#c0392b' : '#2e9e5b';
+    h += '<tr style="border-bottom:1px solid #f2f6f8">'+
+         '<td style="padding:8px 3px"><b>'+it.name+'</b><br><span style="font-size:11px;color:#a8bcc5">'+it.code+'　'+it.indName+'</span></td>'+
+         '<td style="text-align:right;padding:8px 3px;font-variant-numeric:tabular-nums">'+money(it.mkt)+'</td>'+
+         '<td style="text-align:right;padding:8px 3px;font-variant-numeric:tabular-nums;color:'+c+'">'+(it.pnl>=0?'+':'')+money(it.pnl)+'<br><span style="font-size:11px">'+(it.roe>=0?'+':'')+pc(it.roe,1)+'</span></td>'+
+         '<td style="text-align:right;padding:8px 3px;font-weight:700;font-variant-numeric:tabular-nums">'+pc(it.w)+'</td></tr>';
+  });
+  h += '</tbody></table>';
+  h += '</div>';
+
+  /* 未計入提醒 */
+  if (R.noPrice.length || R.skipped.length){
+    h += '<div class="card" style="background:#fffbf0;border:1px solid #f0e0b8">';
+    h += '<h2 style="color:#a67c1a;border-bottom-color:#f0e0b8"><span class="n" style="background:#a67c1a">!</span>未計入計算</h2>';
+    R.noPrice.forEach(function(it){
+      h += '<div style="font-size:13.5px;color:#8a6d1a;padding:4px 0">'+it.code+' '+it.name+'：有股數但<b>沒有現價</b>，未計入集中度與市值</div>';
+    });
+    R.skipped.forEach(function(c){
+      h += '<div style="font-size:13.5px;color:#8a6d1a;padding:4px 0">'+c+'：<b>股數為 0 或空白</b>，未計入</div>';
+    });
+    h += '</div>';
+  }
+
+  $('out').innerHTML = h;
+  $('out').classList.remove('hide');
+  $('actions').classList.remove('hide');
+  $('out').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+$('calc').addEventListener('click', render);
+
+/* 列印：展開全部 */
+window.addEventListener('beforeprint', function(){
+  var o = $('out');
+  if (o && !o.classList.contains('hide')) { /* 內容已全部展開，無摺疊 */ }
+});
+
+$('print').addEventListener('click', function(){ window.print(); });
+
+/* 列印樣式 */
+var st = document.createElement('style');
+st.textContent = '@media print{header{position:static!important}.askbar,#calc,#actions,.btn,.note{display:none!important}'+
+  'body{padding-bottom:0!important;background:#fff!important}.card{box-shadow:none!important;border:1px solid #dde6ea;break-inside:avoid}'+
+  'main{max-width:100%!important;padding:0!important}}';
+document.head.appendChild(st);
+
+/* 離線快取註冊 */
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
+  });
+}
+
+/* 初始化：預設日期 */
+(function(){
+  var d = new Date();
+  var s = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  $('pdate').value = s;
+  addRow();
+  addRow();
+  addRow();
+})();
+
+})();
+</script>
+</body>
+</html>
